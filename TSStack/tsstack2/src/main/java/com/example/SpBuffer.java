@@ -13,7 +13,7 @@ public class SpBuffer {
         top = sentinel;
     }
 
-    public void insSp(Object item) {
+    public void insSp(TimestampedItem item) {
         Node newNode = new Node(item, false);
         Node topMost = top;
         while(topMost.next != topMost && topMost.taken.get()) {
@@ -65,10 +65,10 @@ public class SpBuffer {
 
 class Node {
     Node next;
-    Object item;
+    TimestampedItem item;
     AtomicBoolean taken;
 
-    public Node(Object item, boolean taken) {
+    public Node(TimestampedItem item, boolean taken) {
         this.item = item;
         this.taken = new AtomicBoolean(taken);
     }
