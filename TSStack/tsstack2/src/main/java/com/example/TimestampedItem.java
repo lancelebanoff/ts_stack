@@ -9,8 +9,8 @@ public class TimestampedItem {
 
     public TimestampedItem(Object data) {
         interval = new long[2];
-        interval[0] = System.currentTimeMillis();
-        interval[1] = System.currentTimeMillis();
+        interval[0] = System.nanoTime();
+        interval[1] = System.nanoTime();
         this.data = data;
     }
 }

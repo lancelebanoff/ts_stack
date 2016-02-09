@@ -6,12 +6,20 @@ import java.util.concurrent.atomic.AtomicReference;
 public class SpBuffer {
 
     Node top;
+    private int id;
 
     public SpBuffer() {
+        id = -1;
         Node sentinel = new Node(null, true);
         sentinel.next = sentinel;
         top = sentinel;
     }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getId() { return id; }
 
     public void insSp(TimestampedItem item) {
         Node newNode = new Node(item, false);
@@ -21,6 +29,7 @@ public class SpBuffer {
         }
         newNode.next = topMost;
         top = newNode;
+        TsStackTest.printDebug("SpBuffer " + id + " after inserting node... " + toString());
     }
 
     public NodePair getSp() {
@@ -41,24 +50,25 @@ public class SpBuffer {
 
     public boolean tryRemSP(Node oldTop, Node node) {
         if(node.taken.compareAndSet(false, true)) {
-            synchronized (top) {
+            synchronized (this) {
                 AtomicReference<Node> topRef = new AtomicReference<>(top);
                 topRef.compareAndSet(oldTop, node);
             }
+            TsStackTest.printDebug("  SpBuffer " + id + " after removing node... " + toString());
             return true;
         }
         return false;
     }
 
-    public void printSpBuffer() {
+    @Override
+    public String toString() {
+        String s = "";
         Node node = top;
-        while(node.taken.get()) {
-            node = node.next;
-        }
         while(node.next != node) {
-            System.out.print(node.item + ", ");
+            s += node + ", ";
             node = node.next;
         }
+        return s;
     }
 }
 
@@ -71,6 +81,12 @@ class Node {
     public Node(TimestampedItem item, boolean taken) {
         this.item = item;
         this.taken = new AtomicBoolean(taken);
+    }
+
+    @Override
+    public String toString() {
+        String s = taken.get() ? "T" : "";
+        return s + item.data.toString();
     }
 }
 
