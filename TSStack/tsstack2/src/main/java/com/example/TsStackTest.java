@@ -22,7 +22,7 @@ public class TsStackTest {
         final int percPush = 50;
         final int nOps = 100000;
 
-        TsBuffer.getInstance().tsThreads = new TsThread[nThreads];
+        TsStack.getInstance().tsThreads = new TsThread[nThreads];
 
         ExecutorService es = Executors.newFixedThreadPool(nThreads);
         List<Callable<Void>> threadsToExecute = new ArrayList<>();
