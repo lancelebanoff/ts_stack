@@ -9,15 +9,17 @@ public class TsStack {
     LinkedList<SpBuffer> spBuffers = new LinkedList<>();
 
     private static TsStack tsStack = new TsStack();
-    private TsStack() {}
-    public TsThread[] tsThreads;
+    public static TsThread[] tsThreads;
 
-    Object ins(Object element) {
-        return null;
-    }
+    private TsStack() {}
 
     public static TsStack getInstance() {
         return tsStack;
+    }
+
+    public static void clear() {
+        tsStack = new TsStack();
+        tsThreads = null;
     }
 
     synchronized TimestampedItem ins(Object item, SpBuffer spBuffer) {
@@ -31,7 +33,7 @@ public class TsStack {
         int threadID = TsThread.ThreadID.get();
         TsThread thread = tsThreads[threadID];
 
-        TsStackTest.printDebug("Thread " + threadID + " trying to remove node");
+//        TsStackTest.printDebug("Thread " + threadID + " trying to remove node");
         NodePair youngestNodePair = null;
         TimestampedItem youngestItem = null;
         SpBuffer buffer = null;
@@ -54,7 +56,7 @@ public class TsStack {
             TimestampedItem item = nodePair.result.item;
             if(item.interval[1] > startTime) {
                 if(spBuffer.tryRemSP(nodePair.oldTop, nodePair.result)) {
-                    TsStackTest.printDebug("    Eliminated " + item.data + " with interval [" + item.interval[0] + ", " + item.interval[1] + "]");
+//                    TsStackTest.printDebug("    Eliminated " + item.data + " with interval [" + item.interval[0] + ", " + item.interval[1] + "]");
                     return new RemResult(item);
                 }
             }
@@ -66,14 +68,14 @@ public class TsStack {
         }
 
         if(buffer != null && buffer.tryRemSP(youngestNodePair.oldTop, youngestNodePair.result)) {
-            TsStackTest.printDebug("    Removed " + youngestItem.data + " with interval [" + youngestItem.interval[0] + ", " + youngestItem.interval[1] + "]");
+//            TsStackTest.printDebug("    Removed " + youngestItem.data + " with interval [" + youngestItem.interval[0] + ", " + youngestItem.interval[1] + "]");
             return new RemResult(youngestItem);
         }
         if(sameCount == tsThreads.length) {
-            TsStackTest.printDebug("EMPTY!!!");
+//            TsStackTest.printDebug("EMPTY!!!");
             return new RemResult(RemResult.Result.EMPTY);
         }
-        TsStackTest.printDebug("INVALID!!!");
+//        TsStackTest.printDebug("INVALID!!!");
         return new RemResult(RemResult.Result.INVALID);
     }
 }

@@ -29,7 +29,7 @@ public class SpBuffer {
         }
         newNode.next = topMost;
         top = newNode;
-        TsStackTest.printDebug("SpBuffer " + id + " after inserting node... " + toString());
+//        TsStackTest.printDebug("SpBuffer " + id + " after inserting node... " + toString());
     }
 
     public NodePair getSp() {
@@ -54,7 +54,7 @@ public class SpBuffer {
                 AtomicReference<Node> topRef = new AtomicReference<>(top);
                 topRef.compareAndSet(oldTop, node);
             }
-            TsStackTest.printDebug("  SpBuffer " + id + " after removing node... " + toString());
+//            TsStackTest.printDebug("  SpBuffer " + id + " after removing node... " + toString());
             return true;
         }
         return false;
