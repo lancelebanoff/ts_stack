@@ -39,7 +39,6 @@ public class TsStack {
         int threadID = TsThread.ThreadID.get();
         TsThread thread = tsThreads[threadID];
 
-//        TsStackTest.printDebug("Thread " + threadID + " trying to remove node");
         NodePair youngestNodePair = null;
         TimestampedItem youngestItem = null;
         SpBuffer buffer = null;
@@ -65,7 +64,6 @@ public class TsStack {
             if(item.interval[1] > startTime) {
                 //The item was inserted after this thread started looking for an item to remove, so try to remove the item
                 if(spBuffer.tryRemSP(nodePair.oldTop, nodePair.result)) {
-//                    TsStackTest.printDebug("    Eliminated " + item.data + " with interval [" + item.interval[0] + ", " + item.interval[1] + "]");
                     return new RemResult(item);
                 }
             }
@@ -79,16 +77,13 @@ public class TsStack {
 
         //Try to remove the youngest item
         if(buffer != null && buffer.tryRemSP(youngestNodePair.oldTop, youngestNodePair.result)) {
-//            TsStackTest.printDebug("    Removed " + youngestItem.data + " with interval [" + youngestItem.interval[0] + ", " + youngestItem.interval[1] + "]");
             return new RemResult(youngestItem);
         }
         //If the top pointers of all spBuffers have not changed since the last time this thread attempted to remove an item,
         //we know the stack is empty
         if(sameCount == tsThreads.length) {
-//            TsStackTest.printDebug("EMPTY!!!");
             return new RemResult(RemResult.Result.EMPTY);
         }
-//        TsStackTest.printDebug("INVALID!!!");
         return new RemResult(RemResult.Result.INVALID);
     }
 }

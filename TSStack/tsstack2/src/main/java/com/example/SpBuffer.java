@@ -37,7 +37,6 @@ public class SpBuffer {
         }
         newNode.next = topMost;
         top = newNode;
-//        TsStackTest.printDebug("SpBuffer " + id + " after inserting node... " + toString());
     }
 
     //Finds the topmost node in this buffer that has not been taken
@@ -67,7 +66,6 @@ public class SpBuffer {
                 AtomicReference<Node> topRef = new AtomicReference<>(top);
                 topRef.compareAndSet(oldTop, node);
             }
-//            TsStackTest.printDebug("  SpBuffer " + id + " after removing node... " + toString());
             return true;
         }
         return false;
