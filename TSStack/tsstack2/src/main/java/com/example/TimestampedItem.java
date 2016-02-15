@@ -1,7 +1,7 @@
 package com.example;
 
 /**
- * Created by Kevin on 2/6/2016.
+ * Authors: Kevin Joslyn, Lance Lebanoff, and Logan Lebanoff
  */
 public class TimestampedItem {
     long[] interval;

@@ -1,7 +1,9 @@
 package com.example;
 
 /**
- * Created by Kevin on 2/6/2016.
+ * Authors: Kevin Joslyn, Lance Lebanoff, and Logan Lebanoff
+ *
+ * Represents the result of an attempt to remove an item from the stack
  */
 public class RemResult {
 

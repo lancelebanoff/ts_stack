@@ -8,7 +8,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Created by Lance on 2/5/2016.
+ * Authors: Kevin Joslyn, Lance Lebanoff, and Logan Lebanoff
  */
 public class TsStackTest {
 
