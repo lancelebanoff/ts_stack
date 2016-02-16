@@ -18,35 +18,9 @@ public class TsStackTest {
 
     public static void main(String[] args) {
 
-        final int nThreads = 8;
-        final int percPush = 99;
-        final int nOps = 500000;
-
-        idx = new AtomicInteger(0);
-
-        TsStack.getInstance().tsThreads = new TsThread[nThreads];
-
-        ExecutorService es = Executors.newFixedThreadPool(nThreads);
-        List<Callable<Void>> threadsToExecute = new ArrayList<>();
-        for(int i=0; i<nThreads; i++) {
-            threadsToExecute.add(new TsThread(percPush, nThreads, nOps));
-        }
-
-        long start = System.currentTimeMillis();
-        try {
-            es.invokeAll(threadsToExecute);
-        } catch (InterruptedException e) {}
-        es.shutdown();
-        long end = System.currentTimeMillis();
-
-        System.out.println("nThreads: " + nThreads);
-        System.out.print("push: " + percPush + "%");
-        System.out.println("  pop: " + (100 - percPush) + "%");
-        System.out.println("Elapsed time: " + (end - start) + " ms");
-        System.out.println();
-    }
-
-    public static void runSingleTest(int nThreads, int percPush, int nOps) {
+        final int nThreads = Integer.parseInt(args[0]);
+        final int percPush = Integer.parseInt(args[1]);
+        final int nOps = Integer.parseInt(args[2]);
 
         idx = new AtomicInteger(0);
 
