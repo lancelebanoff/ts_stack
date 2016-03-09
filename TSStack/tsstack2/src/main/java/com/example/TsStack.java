@@ -26,14 +26,14 @@ public class TsStack {
     }
 
     //Inserts an item into the stack
-    synchronized TimestampedItem ins(Object item, SpBuffer spBuffer) {
+    TimestampedItem ins(Object item, SpBuffer spBuffer) {
         TimestampedItem tsItem = new TimestampedItem(item);
         spBuffer.insSp(tsItem);
         return tsItem;
     }
 
     //Attempts to remove an item from the top of the stack
-    synchronized RemResult tryRem(long startTime) {
+    RemResult tryRem(long startTime) {
 
         //Get the thread that is executing this method
         int threadID = TsThread.ThreadID.get();
