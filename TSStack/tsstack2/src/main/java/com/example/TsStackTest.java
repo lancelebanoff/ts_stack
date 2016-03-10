@@ -29,7 +29,7 @@ public class TsStackTest {
         ExecutorService es = Executors.newFixedThreadPool(nThreads);
         List<Callable<Void>> threadsToExecute = new ArrayList<>();
         for(int i=0; i<nThreads; i++) {
-            threadsToExecute.add(new TsThread(percPush, nThreads, nOps));
+            threadsToExecute.add(new TsThread(percPush, nThreads, nOps, TsStack.getInstance()));
         }
 
         long start = System.currentTimeMillis();
