@@ -17,19 +17,21 @@ public class TsThread implements Callable<Void> {
     Node[] topPointers;
     int nBuffers;
     int nOps;
+    TsStack tsStack;
 
-    public TsThread(int percPush, int nBuffers, int nOps) {
+    public TsThread(int percPush, int nBuffers, int nOps, TsStack tsStack) {
         this.percPush = percPush;
         topPointers = new Node[nBuffers];
         this.nBuffers = nBuffers;
         mBuffer = new SpBuffer();
-        TsStack.getInstance().spBuffers.add(mBuffer);
+        tsStack.spBuffers.add(mBuffer);
         this.nOps = nOps;
+        this.tsStack = tsStack;
     }
 
     //Inserts an item into the stack
     public void ins(Object item) {
-        TsStack.getInstance().ins(item, mBuffer);
+        tsStack.ins(item, mBuffer);
     }
 
     @Override
@@ -37,7 +39,7 @@ public class TsThread implements Callable<Void> {
 
         id = ThreadID.get();
         mBuffer.setId(id);
-        TsStack.getInstance().tsThreads[id] = this;
+        tsStack.tsThreads[id] = this;
 
         Random rand = new Random();
 
@@ -48,7 +50,7 @@ public class TsThread implements Callable<Void> {
                 ins(TsStackTest.idx.getAndIncrement());
             }
             else {
-                TsStack.getInstance().tryRem(System.nanoTime());
+                tsStack.tryRem(System.nanoTime());
             }
         }
         return null;
