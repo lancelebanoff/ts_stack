@@ -14,14 +14,14 @@ public class TsThread implements Callable<Void> {
     int percPush; //percentage of operations that should be push operations (remainder are pops)
     int id;
     //topPointers[n] is this thread's last observation of the top pointer of the spBuffer with id = n
-    Node[] topPointers;
+    int[] topPointers;
     int nBuffers;
     int nOps;
     TsStack tsStack;
 
     public TsThread(int percPush, int nBuffers, int nOps, TsStack tsStack) {
         this.percPush = percPush;
-        topPointers = new Node[nBuffers];
+        topPointers = new int[nBuffers];
         this.nBuffers = nBuffers;
         mBuffer = new SpBuffer();
         tsStack.spBuffers.add(mBuffer);
@@ -30,8 +30,8 @@ public class TsThread implements Callable<Void> {
     }
 
     //Inserts an item into the stack
-    public void ins(Object item) {
-        tsStack.ins(item, mBuffer);
+    public void ins(int val) {
+        tsStack.ins(val, mBuffer);
     }
 
     @Override
@@ -50,7 +50,7 @@ public class TsThread implements Callable<Void> {
                 ins(TsStackTest.idx.getAndIncrement());
             }
             else {
-                tsStack.tryRem(System.nanoTime());
+                tsStack.tryRem(TsStack.getCurrentTime());
             }
         }
         return null;

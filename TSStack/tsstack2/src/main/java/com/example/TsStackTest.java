@@ -1,5 +1,6 @@
 package com.example;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -15,9 +16,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class TsStackTest {
 
     public static AtomicInteger idx;
+//    public static boolean verbose = false;
+    public static boolean verbose = true;
 
     public static void main(String[] args) {
-
+        ArrayList<Long[]> list;
         final int nThreads = Integer.parseInt(args[0]);
         final int percPush = Integer.parseInt(args[1]);
         final int nOps = Integer.parseInt(args[2]);
@@ -44,5 +47,9 @@ public class TsStackTest {
         System.out.println("  pop: " + (100 - percPush) + "%");
         System.out.println("Elapsed time: " + (end - start) + " ms");
         System.out.println();
+    }
+    public static void printDebug(String s) {
+        if(verbose)
+            System.out.println(s);
     }
 }

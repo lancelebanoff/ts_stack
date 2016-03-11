@@ -7,15 +7,15 @@ package com.example;
  */
 public class RemResult {
 
-    public TimestampedItem item;
+    public int val;
     public Result result;
 
     public static enum Result {
-        VALID, INVALID, EMPTY
+        VALID, EMPTY
     }
 
-    public RemResult(TimestampedItem item) {
-        this.item = item;
+    public RemResult(int val) {
+        this.val = val;
         result = Result.VALID;
     }
 
@@ -23,3 +23,25 @@ public class RemResult {
         this.result = result;
     }
 }
+
+class GetSpResult {
+    long info;
+    int value;
+    int idx;
+    int oldTop;
+    public GetSpResult(long info, int value, int idx, int oldTop) {
+        this.info = info;
+        this.value = value;
+        this.idx = idx;
+        this.oldTop = oldTop;
+    }
+
+    public long getStartOfInterval() {
+        return info >> 33;
+    }
+
+    public long getEndOfInterval() {
+        return info << 31 >> 33;
+    }
+}
+

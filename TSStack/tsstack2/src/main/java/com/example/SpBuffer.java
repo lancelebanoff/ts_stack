@@ -1,25 +1,27 @@
 package com.example;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLongArray;
 
 /**
  * Authors: Kevin Joslyn, Lance Lebanoff, and Logan Lebanoff
  *
- * SpBuffer is a single producer, multiple consumer linked list of nodes.
+ * SpBuffer is a single producer, multiple consumer array.
  * Each thread is a producer for one SpBuffer, and all threads are consumers.
  */
 public class SpBuffer {
 
-    Node top;
+    private AtomicInteger top;
+    private AtomicLongArray infoArray;
+    int[] values;
+    static int maxNumElements;
     private int id;
 
-    //Initialize the buffer with one node which points to itself
     public SpBuffer() {
-        id = -1;
-        Node sentinel = new Node(null, true);
-        sentinel.next = sentinel;
-        top = sentinel;
+
+        infoArray = new AtomicLongArray(maxNumElements);
+        values = new int[maxNumElements];
+        top = new AtomicInteger(-1);
     }
 
     public void setId(int id) {
@@ -28,85 +30,102 @@ public class SpBuffer {
 
     public int getId() { return id; }
 
-    //Inserts a node into the SpBuffer
-    public void insSp(TimestampedItem item) {
-        Node newNode = new Node(item, false);
-        Node topMost = top;
-        while(topMost.next != topMost && topMost.taken.get()) {
-            topMost = topMost.next;
-        }
-        newNode.next = topMost;
-        top = newNode;
+    public int getTop() {
+        return top.get();
     }
 
-    //Finds the topmost node in this buffer that has not been taken
-    public NodePair getSp() {
-        Node oldTop = top;
-        Node result = oldTop;
+    public void doInsert(int val) {
+        insSp(TsStack.createInfo(), val);
+        System.out.println(toString());
+    }
+
+    public int doTryRemSP() {
+        int val = -1;
+        try {
+            val = tryRemSP(getSp());
+            System.out.println(toString());
+        } catch(Exception e) { e.printStackTrace(); }
+        return val;
+    }
+
+    //From upper to lower bits: 31 for start time, 31 for end time, 1 empty, 1 taken
+    //Taken bit will be initialized to 0 so nothing needs to be done for that
+    public static long createInfo() {
+        long startTime = System.currentTimeMillis() << 33;
+        long endTime = System.currentTimeMillis() << 33 >> 31;
+        return startTime + endTime;
+    }
+
+    public void insSp(long info, int value) {
+
+        int idx = top.get();
+        while(idx >= 0 && isTaken(idx)) {
+            idx--;
+        }
+        int newTop = idx + 1;
+        top.set(newTop);
+
+        infoArray.set(newTop, info);
+        values[newTop] = value;
+        TsStackTest.printDebug("SpBuffer " + id + " after inserting node... " + toString());
+    }
+
+    public boolean isTaken(int idx) {
+
+        long val = infoArray.get(idx);
+        return (val & 1) == 1;
+    }
+
+    public GetSpResult getSp() {
+        int oldTop = top.get();
+        int idx = oldTop;
         while(true) {
-            if(!result.taken.get()) {
-                //We found an item in the buffer that has not yet been taken
-                return new NodePair(result, oldTop);
+            if(idx < 0) {
+                //this buffer is empty
+                return new GetSpResult(-1, -1, -1, -1);
             }
-            else if(result.next == result) {
-                //We have reached the sentinel node, so this buffer is empty
-                return new NodePair(null, oldTop);
+            else if(!isTaken(idx)) {
+                //We found an item in the buffer that has not yet been taken
+                GetSpResult getSpResult = new GetSpResult(infoArray.get(idx), values[idx], idx, oldTop);
+                return getSpResult;
             }
             else {
-                result = result.next;
+                idx--;
             }
         }
     }
 
-    //Try to remove the node from this buffer
-    public boolean tryRemSP(Node oldTop, Node node) {
-        if(node.taken.compareAndSet(false, true)) {
-            synchronized (this) {
-                //Set the top reference to the node being removed, since all nodes above it have been taken.
-                AtomicReference<Node> topRef = new AtomicReference<>(top);
-                topRef.compareAndSet(oldTop, node);
-            }
-            return true;
+    class RemovalException extends Exception {
+        RemoveErrorType errorType;
+        public RemovalException(RemoveErrorType errorType) {
+            this.errorType = errorType;
         }
-        return false;
+    }
+
+    enum RemoveErrorType {
+        ALREADY_TAKEN
+    }
+
+    public int tryRemSP(GetSpResult getSpResult) throws RemovalException {
+        if(infoArray.compareAndSet(getSpResult.idx, getSpResult.info, getSpResult.info + 1)) {
+            top.compareAndSet(getSpResult.oldTop, getSpResult.idx);
+            TsStackTest.printDebug("  SpBuffer " + id + " after removing node... " + toString());
+            return getSpResult.value;
+        }
+        else
+            throw new RemovalException(RemoveErrorType.ALREADY_TAKEN);
     }
 
     @Override
     public String toString() {
         String s = "";
-        Node node = top;
-        while(node.next != node) {
-            s += node + ", ";
-            node = node.next;
+        int idx = 0;
+        while(idx <= top.get()) {
+            if(isTaken(idx))
+                s += "T";
+            s += values[idx] + ", ";
+            idx++;
         }
         return s;
-    }
-}
-
-
-class Node {
-    Node next;
-    TimestampedItem item;
-    AtomicBoolean taken;
-
-    public Node(TimestampedItem item, boolean taken) {
-        this.item = item;
-        this.taken = new AtomicBoolean(taken);
-    }
-
-    @Override
-    public String toString() {
-        String s = taken.get() ? "T" : "";
-        return s + item.data.toString();
-    }
-}
-
-class NodePair {
-    Node result;
-    Node oldTop;
-
-    public NodePair(Node result, Node oldTop) {
-        this.result = result;
-        this.oldTop = oldTop;
     }
 }
