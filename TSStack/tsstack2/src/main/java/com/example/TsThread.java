@@ -51,7 +51,8 @@ public class TsThread implements Callable<Void> {
         Random rand = new Random();
 
         //Execute a push or pop on the stack. The frequency of push is controlled by percPush
-        for(int i=0; i<nOps; i++) {
+        int i;
+        for(i=0; i<nOps; i++) {
             int x = rand.nextInt(100) + 1;
             if(x <= percPush) {
                 ins(TsStackTest.idx.getAndIncrement());
@@ -60,6 +61,7 @@ public class TsThread implements Callable<Void> {
                 tsStack.tryRem(TsStack.getCurrentTime());
             }
         }
+        TsStackTest.printDebug(id, "numOps executed = " + i);
         return null;
     }
 

@@ -14,7 +14,7 @@ public class SpBuffer {
     private AtomicInteger top;
     private AtomicLongArray infoArray;
     int[] values;
-    static int maxNumElements = 5;
+    static int maxNumElements;
     private int id;
 
     public SpBuffer() {
@@ -22,6 +22,10 @@ public class SpBuffer {
         infoArray = new AtomicLongArray(maxNumElements);
         values = new int[maxNumElements];
         top = new AtomicInteger(-1);
+    }
+
+    public static void setMaxNumElements(int max) {
+        maxNumElements = max;
     }
 
     public void setId(int id) {
@@ -67,7 +71,8 @@ public class SpBuffer {
 
         infoArray.set(newTop, info);
         values[newTop] = value;
-        TsStackTest.printDebug(TsThread.ThreadID.get(), "SpBuffer " + id + " after inserting node... " + toString());
+//        TsStackTest.printDebug(TsThread.ThreadID.get(), "SpBuffer " + id + " after inserting node... " + toString()
+//        		+ " [" + (info >>> 33) + ", " + (info << 31 >>> 33) + "]");
     }
 
     public boolean isTaken(int idx) {
@@ -109,7 +114,7 @@ public class SpBuffer {
     public int tryRemSP(GetSpResult getSpResult) throws RemovalException {
         if(infoArray.compareAndSet(getSpResult.idx, getSpResult.info, getSpResult.info + 1)) {
             top.compareAndSet(getSpResult.oldTop, getSpResult.idx);
-            TsStackTest.printDebug(TsThread.ThreadID.get(), "  SpBuffer " + id + " after removing node... " + toString());
+//            TsStackTest.printDebug(TsThread.ThreadID.get(), "  SpBuffer " + id + " after removing node... " + toString());
             return getSpResult.value;
         }
         else

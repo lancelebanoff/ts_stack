@@ -25,6 +25,8 @@ public class TsStackTest {
         final int percPush = Integer.parseInt(args[1]);
         final int nOps = Integer.parseInt(args[2]);
 
+        SpBuffer.setMaxNumElements(nOps);
+
         idx = new AtomicInteger(0);
 
         TsStack.getInstance().tsThreads = new TsThread[nThreads];
