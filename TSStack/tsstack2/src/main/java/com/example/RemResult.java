@@ -37,11 +37,11 @@ class GetSpResult {
     }
 
     public long getStartOfInterval() {
-        return info >> 33;
+        return info >>> 33;
     }
 
     public long getEndOfInterval() {
-        return info << 31 >> 33;
+        return info << 31 >>> 33;
     }
 }
 

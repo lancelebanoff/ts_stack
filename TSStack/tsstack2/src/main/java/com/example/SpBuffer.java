@@ -52,7 +52,7 @@ public class SpBuffer {
     //Taken bit will be initialized to 0 so nothing needs to be done for that
     public static long createInfo() {
         long startTime = System.currentTimeMillis() << 33;
-        long endTime = System.currentTimeMillis() << 33 >> 31;
+        long endTime = System.currentTimeMillis() << 33 >>> 31;
         return startTime + endTime;
     }
 
