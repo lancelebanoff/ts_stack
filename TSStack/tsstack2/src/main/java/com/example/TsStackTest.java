@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class TsStackTest {
 
     public static AtomicInteger idx;
-//    public static boolean verbose = false;
+    //    public static boolean verbose = false;
     public static boolean verbose = true;
 
     public static void main(String[] args) {
@@ -29,6 +29,8 @@ public class TsStackTest {
 
         TsStack.getInstance().tsThreads = new TsThread[nThreads];
 
+//        TsThread thread = new TsThread(percPush, nThreads, nOps, TsStack.getInstance());
+//        thread.doInsert();
         ExecutorService es = Executors.newFixedThreadPool(nThreads);
         List<Callable<Void>> threadsToExecute = new ArrayList<>();
         for(int i=0; i<nThreads; i++) {
@@ -48,8 +50,10 @@ public class TsStackTest {
         System.out.println("Elapsed time: " + (end - start) + " ms");
         System.out.println();
     }
-    public static void printDebug(String s) {
-        if(verbose)
-            System.out.println(s);
+    public static void printDebug(int threadID, String s) {
+        if(verbose) {
+            System.out.println(threadID + ": " + s);
+        }
     }
 }
+

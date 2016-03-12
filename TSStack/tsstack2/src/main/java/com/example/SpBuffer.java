@@ -14,7 +14,7 @@ public class SpBuffer {
     private AtomicInteger top;
     private AtomicLongArray infoArray;
     int[] values;
-    static int maxNumElements;
+    static int maxNumElements = 5;
     private int id;
 
     public SpBuffer() {
@@ -67,7 +67,7 @@ public class SpBuffer {
 
         infoArray.set(newTop, info);
         values[newTop] = value;
-        TsStackTest.printDebug("SpBuffer " + id + " after inserting node... " + toString());
+        TsStackTest.printDebug(TsThread.ThreadID.get(), "SpBuffer " + id + " after inserting node... " + toString());
     }
 
     public boolean isTaken(int idx) {
@@ -109,7 +109,7 @@ public class SpBuffer {
     public int tryRemSP(GetSpResult getSpResult) throws RemovalException {
         if(infoArray.compareAndSet(getSpResult.idx, getSpResult.info, getSpResult.info + 1)) {
             top.compareAndSet(getSpResult.oldTop, getSpResult.idx);
-            TsStackTest.printDebug("  SpBuffer " + id + " after removing node... " + toString());
+            TsStackTest.printDebug(TsThread.ThreadID.get(), "  SpBuffer " + id + " after removing node... " + toString());
             return getSpResult.value;
         }
         else
@@ -129,3 +129,4 @@ public class SpBuffer {
         return s;
     }
 }
+

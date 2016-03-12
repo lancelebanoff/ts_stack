@@ -1,5 +1,6 @@
 package com.example;
 
+import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.Callable;
 
@@ -22,6 +23,7 @@ public class TsThread implements Callable<Void> {
     public TsThread(int percPush, int nBuffers, int nOps, TsStack tsStack) {
         this.percPush = percPush;
         topPointers = new int[nBuffers];
+        Arrays.fill(topPointers, -2);
         this.nBuffers = nBuffers;
         mBuffer = new SpBuffer();
         tsStack.spBuffers.add(mBuffer);
@@ -32,6 +34,11 @@ public class TsThread implements Callable<Void> {
     //Inserts an item into the stack
     public void ins(int val) {
         tsStack.ins(val, mBuffer);
+    }
+
+    //TODO: Remove later
+    public void doInsert() {
+        ins(TsStackTest.idx.getAndIncrement());
     }
 
     @Override
@@ -73,3 +80,4 @@ public class TsThread implements Callable<Void> {
         }
     }
 }
+
