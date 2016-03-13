@@ -27,8 +27,7 @@ public class TsStack {
 
     //Inserts an item into the stack
     void ins(int val, SpBuffer spBuffer) {
-        long info = createInfo();
-        spBuffer.insSp(info, val);
+        spBuffer.insSp(val);
     }
 
     //From upper to lower bits: 31 for start time, 31 for end time, 1 empty, 1 taken

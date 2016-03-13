@@ -39,7 +39,7 @@ public class SpBuffer {
     }
 
     public void doInsert(int val) {
-        insSp(TsStack.createInfo(), val);
+        insSp(val);
         System.out.println(toString());
     }
 
@@ -60,14 +60,17 @@ public class SpBuffer {
         return startTime + endTime;
     }
 
-    public void insSp(long info, int value) {
+    public void insSp(int value) {
 
+        long startTime = System.currentTimeMillis() << 33;
         int idx = top.get();
         while(idx >= 0 && isTaken(idx)) {
             idx--;
         }
         int newTop = idx + 1;
         top.set(newTop);
+        long endTime = System.currentTimeMillis() << 33 >>> 31;
+        long info = startTime + endTime;
 
         infoArray.set(newTop, info);
         values[newTop] = value;
