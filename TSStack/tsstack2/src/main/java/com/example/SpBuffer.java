@@ -44,6 +44,10 @@ public class SpBuffer {
         Node oldTop = top;
         Node result = oldTop;
         while(true) {
+            if(result == null) {
+                //There are no available nodes in this buffer
+                return new NodePair(null, oldTop);
+            }
             if(!result.taken.get()) {
                 //We found an item in the buffer that has not yet been taken
                 return new NodePair(result, oldTop);
