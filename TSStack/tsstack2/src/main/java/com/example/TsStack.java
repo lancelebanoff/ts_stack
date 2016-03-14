@@ -106,6 +106,8 @@ public class TsStack {
             for (int i : order) {
 
                 SpBuffer spBuffer = spBuffers.get(i);
+                if (spBuffer.getId() < 0)
+                    continue;
 
                 //This section keeps track of the top pointers of all spBuffers
                 Node prevSeenTop = null;
