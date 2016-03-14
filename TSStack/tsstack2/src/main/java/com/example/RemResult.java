@@ -10,7 +10,7 @@ public class RemResult {
     public int val;
     public Result result;
 
-    public static enum Result {
+    public enum Result {
         VALID, EMPTY
     }
 

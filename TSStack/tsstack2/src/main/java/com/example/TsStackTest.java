@@ -20,12 +20,12 @@ public class TsStackTest {
 
     public static void main(String[] args) {
         ArrayList<Long[]> list;
-//        final int nThreads = Integer.parseInt(args[0]);
-//        final int percPush = Integer.parseInt(args[1]);
-//        final int nOps = Integer.parseInt(args[2]);
-        final int nThreads = 2;
-        final int percPush = 50;
-        final int nOps = 20000000;
+        final int nThreads = Integer.parseInt(args[0]);
+        final int percPush = Integer.parseInt(args[1]);
+        final int nOps = Integer.parseInt(args[2]);
+//        final int nThreads = 2;
+//        final int percPush = 50;
+//        final int nOps = 20000000;
 
         SpBuffer.setMaxNumElements(nOps);
 
@@ -33,8 +33,6 @@ public class TsStackTest {
 
         TsStack stack = new TsStack(nThreads);
 
-//        TsThread thread = new TsThread(percPush, nThreads, nOps, TsStack.getInstance());
-//        thread.doInsert();
         ExecutorService es = Executors.newFixedThreadPool(nThreads);
         List<Callable<Void>> threadsToExecute = new ArrayList<>();
         for(int i=0; i<nThreads; i++) {

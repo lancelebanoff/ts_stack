@@ -36,11 +36,6 @@ public class TsThread implements Callable<Void> {
         tsStack.ins(val, mBuffer);
     }
 
-    //TODO: Remove later
-    public void doInsert() {
-        ins(TsStackTest.idx.getAndIncrement());
-    }
-
     @Override
     public Void call() throws Exception {
 

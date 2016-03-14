@@ -18,7 +18,6 @@ public class SpBuffer {
     private int id;
 
     public SpBuffer() {
-
         infoArray = new AtomicLongArray(maxNumElements);
         values = new int[maxNumElements];
         top = new AtomicInteger(-1);
@@ -38,20 +37,6 @@ public class SpBuffer {
         return top.get();
     }
 
-    public void doInsert(int val) {
-        insSp(val);
-        System.out.println(toString());
-    }
-
-    public int doTryRemSP() {
-        int val = -1;
-        try {
-            val = tryRemSP(getSp());
-            System.out.println(toString());
-        } catch(Exception e) { e.printStackTrace(); }
-        return val;
-    }
-
     //From upper to lower bits: 31 for start time, 31 for end time, 1 empty, 1 taken
     //Taken bit will be initialized to 0 so nothing needs to be done for that
     public static long createInfo() {
@@ -60,8 +45,8 @@ public class SpBuffer {
         return startTime + endTime;
     }
 
+    //Inserts an item into this single-producer buffer
     public void insSp(int value) {
-
         long startTime = System.currentTimeMillis() << 33;
         int idx = top.get();
         while(idx >= 0 && isTaken(idx)) {
@@ -70,20 +55,19 @@ public class SpBuffer {
         int newTop = idx + 1;
         top.set(newTop);
         long endTime = System.currentTimeMillis() << 33 >>> 31;
-        long info = startTime + endTime;
+        long info = startTime + endTime; //Store the start and end times in the same long
 
         infoArray.set(newTop, info);
         values[newTop] = value;
-//        TsStackTest.printDebug(TsThread.ThreadID.get(), "SpBuffer " + id + " after inserting node... " + toString()
-//        		+ " [" + (info >>> 33) + ", " + (info << 31 >>> 33) + "]");
     }
 
+    //Returns whether the value at this index has been taken by another thread
     public boolean isTaken(int idx) {
-
         long val = infoArray.get(idx);
-        return (val & 1) == 1;
+        return (val & 1) == 1; //The taken flag is the last bit of the long
     }
 
+    //Finds the topmost item in this buffer that has not been taken
     public GetSpResult getSp() {
         int oldTop = top.get();
         int idx = oldTop;
@@ -114,10 +98,10 @@ public class SpBuffer {
         ALREADY_TAKEN
     }
 
+    //Try to remove the value from this buffer
     public int tryRemSP(GetSpResult getSpResult) throws RemovalException {
         if(infoArray.compareAndSet(getSpResult.idx, getSpResult.info, getSpResult.info + 1)) {
             top.compareAndSet(getSpResult.oldTop, getSpResult.idx);
-//            TsStackTest.printDebug(TsThread.ThreadID.get(), "  SpBuffer " + id + " after removing node... " + toString());
             return getSpResult.value;
         }
         else
