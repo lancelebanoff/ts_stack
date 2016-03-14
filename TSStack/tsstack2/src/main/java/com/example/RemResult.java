@@ -10,8 +10,8 @@ public class RemResult {
     public TimestampedItem item;
     public Result result;
 
-    public static enum Result {
-        VALID, INVALID, EMPTY
+    public enum Result {
+        VALID, EMPTY
     }
 
     public RemResult(TimestampedItem item) {

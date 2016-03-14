@@ -21,15 +21,18 @@ public class TsStackTest {
         final int nThreads = Integer.parseInt(args[0]);
         final int percPush = Integer.parseInt(args[1]);
         final int nOps = Integer.parseInt(args[2]);
+//        final int nThreads = 2;
+//        final int percPush = 50;
+//        final int nOps = 20000000;
 
         idx = new AtomicInteger(0);
 
-        TsStack.getInstance().tsThreads = new TsThread[nThreads];
+        TsStack stack = new TsStack(nThreads);
 
         ExecutorService es = Executors.newFixedThreadPool(nThreads);
         List<Callable<Void>> threadsToExecute = new ArrayList<>();
         for(int i=0; i<nThreads; i++) {
-            threadsToExecute.add(new TsThread(percPush, nThreads, nOps, TsStack.getInstance()));
+            threadsToExecute.add(new TsThread(percPush, nThreads, nOps, stack));
         }
 
         long start = System.currentTimeMillis();
