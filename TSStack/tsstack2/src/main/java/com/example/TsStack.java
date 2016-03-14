@@ -1,6 +1,11 @@
 package com.example;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.IntUnaryOperator;
 
 /**
  * Authors: Kevin Joslyn, Lance Lebanoff, and Logan Lebanoff
@@ -11,18 +16,68 @@ import java.util.LinkedList;
 public class TsStack {
     LinkedList<SpBuffer> spBuffers = new LinkedList<>();
 
-    private static TsStack tsStack = new TsStack();
-    public static TsThread[] tsThreads;
+    public TsThread[] tsThreads;
+    private int nThreads;
+    private int numOrderings;
+    private byte[][] spBufferOrderings;
+    private AtomicInteger orderIdx;
 
-    private TsStack() {}
-
-    public static TsStack getInstance() {
-        return tsStack;
+    public TsStack(int nThreads) {
+        this.nThreads = nThreads;
+        numOrderings = factorial(nThreads);
+        orderIdx = new AtomicInteger(0);
+        tsThreads = new TsThread[nThreads];
+        createSpBufferOrderings();
     }
 
-    public static void clear() {
-        tsStack = new TsStack();
-        tsThreads = null;
+    private void createSpBufferOrderings() {
+        spBufferOrderings = new byte[numOrderings][nThreads];
+        permute(0, new boolean[nThreads], new byte[nThreads]);
+        shuffleOrderings();
+    }
+
+    private static int factorial(int n) {
+        int fact = 1; // this  will be the result
+        for (int i = 1; i <= n; i++) {
+            fact *= i;
+        }
+        return fact;
+    }
+
+    private IntUnaryOperator orderIdxOperator = new IntUnaryOperator() {
+        @Override
+        public int applyAsInt(int operand) {
+            return (operand + 1) % numOrderings;
+        }
+    };
+
+    private void permute(int p, boolean[] used, byte[] perm) {
+        if(p == nThreads) {
+            int idx = orderIdx.getAndUpdate(orderIdxOperator);
+            for(int i=0; i<nThreads; i++) {
+                spBufferOrderings[idx][i] = perm[i];
+            }
+        }
+        for(byte i=0; i<nThreads; i++) {
+            if(!used[i]) {
+                used[i] = true;
+                perm[p] = i;
+                permute(p+1, used, perm);
+                used[i] = false;
+            }
+        }
+    }
+
+    private void shuffleOrderings() {
+        int idx;
+        byte[] temp;
+        Random random = new Random();
+        for(int i = spBufferOrderings.length - 1; i > 0; i--) {
+            idx = random.nextInt(i + 1);
+            temp = spBufferOrderings[idx];
+            spBufferOrderings[idx] = spBufferOrderings[i];
+            spBufferOrderings[i] = temp;
+        }
     }
 
     //Inserts an item into the stack
@@ -61,8 +116,14 @@ public class TsStack {
 
             int sameCount = 0;
 
+            List<GetSpResult> resultList = new ArrayList<>();
             //Look through each single-producer buffer
-            for (SpBuffer spBuffer : spBuffers) {
+
+            byte[] order = spBufferOrderings[orderIdx.getAndUpdate(orderIdxOperator)];
+
+            for(int idx : order) {
+
+                SpBuffer spBuffer = spBuffers.get(idx);
 
                 //This section keeps track of the top pointers of all spBuffers
                 int prevSeenTop = -2;
@@ -76,6 +137,7 @@ public class TsStack {
                 GetSpResult getSpResult = spBuffer.getSp();
                 if (getSpResult.idx == -1) //The spBuffer was empty
                     continue;
+                resultList.add(getSpResult);
                 if (getSpResult.getEndOfInterval() > startTime) {
                     //The item was inserted after this thread started looking for an item to remove, so try to remove the item
                     try {

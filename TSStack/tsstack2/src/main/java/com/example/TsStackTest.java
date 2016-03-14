@@ -29,14 +29,14 @@ public class TsStackTest {
 
         idx = new AtomicInteger(0);
 
-        TsStack.getInstance().tsThreads = new TsThread[nThreads];
+        TsStack stack = new TsStack(nThreads);
 
 //        TsThread thread = new TsThread(percPush, nThreads, nOps, TsStack.getInstance());
 //        thread.doInsert();
         ExecutorService es = Executors.newFixedThreadPool(nThreads);
         List<Callable<Void>> threadsToExecute = new ArrayList<>();
         for(int i=0; i<nThreads; i++) {
-            threadsToExecute.add(new TsThread(percPush, nThreads, nOps, TsStack.getInstance()));
+            threadsToExecute.add(new TsThread(percPush, nThreads, nOps, stack));
         }
 
         long start = System.currentTimeMillis();
@@ -52,6 +52,7 @@ public class TsStackTest {
         System.out.println("Elapsed time: " + (end - start) + " ms");
         System.out.println();
     }
+
     public static void printDebug(int threadID, String s) {
         if(verbose) {
             System.out.println(threadID + ": " + s);
