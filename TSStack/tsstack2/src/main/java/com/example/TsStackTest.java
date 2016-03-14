@@ -1,6 +1,5 @@
 package com.example;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -21,9 +20,12 @@ public class TsStackTest {
 
     public static void main(String[] args) {
         ArrayList<Long[]> list;
-        final int nThreads = Integer.parseInt(args[0]);
-        final int percPush = Integer.parseInt(args[1]);
-        final int nOps = Integer.parseInt(args[2]);
+//        final int nThreads = Integer.parseInt(args[0]);
+//        final int percPush = Integer.parseInt(args[1]);
+//        final int nOps = Integer.parseInt(args[2]);
+        final int nThreads = 2;
+        final int percPush = 50;
+        final int nOps = 20000000;
 
         SpBuffer.setMaxNumElements(nOps);
 

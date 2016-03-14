@@ -5,7 +5,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.IntUnaryOperator;
 
 /**
  * Authors: Kevin Joslyn, Lance Lebanoff, and Logan Lebanoff
@@ -44,16 +43,16 @@ public class TsStack {
         return fact;
     }
 
-    private IntUnaryOperator orderIdxOperator = new IntUnaryOperator() {
-        @Override
-        public int applyAsInt(int operand) {
-            return (operand + 1) % numOrderings;
-        }
-    };
+//    private IntUnaryOperator orderIdxOperator = new IntUnaryOperator() {
+//        @Override
+//        public int applyAsInt(int operand) {
+//            return (operand + 1) % numOrderings;
+//        }
+//    };
 
     private void permute(int p, boolean[] used, byte[] perm) {
         if(p == nThreads) {
-            int idx = orderIdx.getAndUpdate(orderIdxOperator);
+            int idx = orderIdx.getAndIncrement() % numOrderings;
             for(int i=0; i<nThreads; i++) {
                 spBufferOrderings[idx][i] = perm[i];
             }
@@ -119,7 +118,7 @@ public class TsStack {
             List<GetSpResult> resultList = new ArrayList<>();
             //Look through each single-producer buffer
 
-            byte[] order = spBufferOrderings[orderIdx.getAndUpdate(orderIdxOperator)];
+            byte[] order = spBufferOrderings[orderIdx.getAndIncrement() % numOrderings];
 
             for(int idx : order) {
 
