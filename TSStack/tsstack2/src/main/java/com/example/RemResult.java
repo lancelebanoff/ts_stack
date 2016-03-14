@@ -29,7 +29,9 @@ class GetSpResult {
     int value;
     int idx;
     int oldTop;
-    public GetSpResult(long info, int value, int idx, int oldTop) {
+    int spBufferIdx;
+    public GetSpResult(int spBufferIdx, long info, int value, int idx, int oldTop) {
+        this.spBufferIdx = spBufferIdx;
         this.info = info;
         this.value = value;
         this.idx = idx;

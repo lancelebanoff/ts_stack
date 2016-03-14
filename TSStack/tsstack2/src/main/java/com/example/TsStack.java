@@ -1,6 +1,7 @@
 package com.example;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -20,6 +21,7 @@ public class TsStack {
     private int numOrderings;
     private byte[][] spBufferOrderings;
     private AtomicInteger orderIdx;
+    private Random mRandom;
 
     public TsStack(int nThreads) {
         this.nThreads = nThreads;
@@ -27,6 +29,7 @@ public class TsStack {
         orderIdx = new AtomicInteger(0);
         tsThreads = new TsThread[nThreads];
         createSpBufferOrderings();
+        mRandom = new Random();
     }
 
     private void createSpBufferOrderings() {
@@ -109,9 +112,8 @@ public class TsStack {
 			int threadID = TsThread.ThreadID.get();
 			TsThread thread = tsThreads[threadID];
 
-//			TsStackTest.printDebug(threadID, "trying to remove node");
+			TsStackTest.printDebug(threadID, "trying to remove node");
 			GetSpResult youngestResult = null;
-			SpBuffer buffer = null;
 
             int sameCount = 0;
 
@@ -136,35 +138,47 @@ public class TsStack {
                 GetSpResult getSpResult = spBuffer.getSp();
                 if (getSpResult.idx == -1) //The spBuffer was empty
                     continue;
-                resultList.add(getSpResult);
                 if (getSpResult.getEndOfInterval() > startTime) {
                     //The item was inserted after this thread started looking for an item to remove, so try to remove the item
                     try {
                         int val = spBuffer.tryRemSP(getSpResult);
-//                        TsStackTest.printDebug(threadID, "    Eliminated " + val + " with interval [" + getSpResult.getStartOfInterval() + ", " + getSpResult.getEndOfInterval() + "]");
+                        TsStackTest.printDebug(threadID, "    Eliminated " + val + " with interval [" + getSpResult.getStartOfInterval() + ", " + getSpResult.getEndOfInterval() + "]");
                         return new RemResult(val);
                     } catch (SpBuffer.RemovalException e) {
                         //Item already removed, keep going
                         continue;
                     }
                 }
-                //If the item was inserted more recently than the known youngest item, mark this item as youngest
-                if (youngestResult == null || getSpResult.getStartOfInterval() > youngestResult.getEndOfInterval()) {
+//                //If the item was inserted more recently than the known youngest item, mark this item as youngest
+                if (youngestResult == null || getSpResult.getEndOfInterval() > youngestResult.getEndOfInterval()) {
                     youngestResult = getSpResult;
-                    buffer = spBuffer;
                 }
+                resultList.add(getSpResult);
             }
 
-            if (buffer != null) {
+            List<GetSpResult> newResultList = new ArrayList<>();
+            for(GetSpResult result : resultList) {
+                if(result.getEndOfInterval() >= youngestResult.getStartOfInterval())
+                    newResultList.add(result);
+            }
+            GetSpResult chosenResult = null;
+            if(newResultList.size() > 1) {
+                chosenResult = newResultList.get(mRandom.nextInt(newResultList.size()));
+            }
+            else if(newResultList.size() == 1) {
+                chosenResult = newResultList.get(0);
+            }
+            if(chosenResult != null) {
+                SpBuffer buffer = spBuffers.get(chosenResult.spBufferIdx);
                 try {
-                    int val = buffer.tryRemSP(youngestResult);
-                    if (val != youngestResult.value) {
+                    int val = buffer.tryRemSP(chosenResult);
+                    if (val != chosenResult.value) {
                         throw new Exception("Error: value mismatch!");
                     }
-//                    TsStackTest.printDebug(threadID, "    Removed " + val + " with interval [" + youngestResult.getStartOfInterval() + ", " + youngestResult.getEndOfInterval() + "]");
+                    TsStackTest.printDebug(threadID, "    Removed " + val + " with interval [" + youngestResult.getStartOfInterval() + ", " + youngestResult.getEndOfInterval() + "]");
                     return new RemResult(val);
                 } catch (SpBuffer.RemovalException e) { //The item was already taken, try again
-//                    TsStackTest.printDebug(threadID, "INVALID!!!");
+                    TsStackTest.printDebug(threadID, "INVALID!!!");
                     continue;
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
@@ -175,7 +189,7 @@ public class TsStack {
             //If the top pointers of all spBuffers have not changed since the last time this thread attempted to remove an item,
             //we know the stack is empty
             else if (sameCount == tsThreads.length) {
-//                TsStackTest.printDebug(threadID, "EMPTY!!!");
+                TsStackTest.printDebug(threadID, "EMPTY!!!");
                 return new RemResult(RemResult.Result.EMPTY);
             }
             //If buffer == null and sameCount != tsThreads.length, the stack may be empty but we have to try one more time to be sure. If the

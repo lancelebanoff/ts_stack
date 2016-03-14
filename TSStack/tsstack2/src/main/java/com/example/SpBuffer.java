@@ -74,8 +74,8 @@ public class SpBuffer {
 
         infoArray.set(newTop, info);
         values[newTop] = value;
-//        TsStackTest.printDebug(TsThread.ThreadID.get(), "SpBuffer " + id + " after inserting node... " + toString()
-//        		+ " [" + (info >>> 33) + ", " + (info << 31 >>> 33) + "]");
+        TsStackTest.printDebug(TsThread.ThreadID.get(), "SpBuffer " + id + " after inserting node... " + toString()
+        		+ " [" + (info >>> 33) + ", " + (info << 31 >>> 33) + "]");
     }
 
     public boolean isTaken(int idx) {
@@ -90,11 +90,11 @@ public class SpBuffer {
         while(true) {
             if(idx < 0) {
                 //this buffer is empty
-                return new GetSpResult(-1, -1, -1, -1);
+                return new GetSpResult(id, -1, -1, -1, -1);
             }
             else if(!isTaken(idx)) {
                 //We found an item in the buffer that has not yet been taken
-                GetSpResult getSpResult = new GetSpResult(infoArray.get(idx), values[idx], idx, oldTop);
+                GetSpResult getSpResult = new GetSpResult(id, infoArray.get(idx), values[idx], idx, oldTop);
                 return getSpResult;
             }
             else {
@@ -117,7 +117,7 @@ public class SpBuffer {
     public int tryRemSP(GetSpResult getSpResult) throws RemovalException {
         if(infoArray.compareAndSet(getSpResult.idx, getSpResult.info, getSpResult.info + 1)) {
             top.compareAndSet(getSpResult.oldTop, getSpResult.idx);
-//            TsStackTest.printDebug(TsThread.ThreadID.get(), "  SpBuffer " + id + " after removing node... " + toString());
+            TsStackTest.printDebug(TsThread.ThreadID.get(), "  SpBuffer " + id + " after removing node... " + toString());
             return getSpResult.value;
         }
         else
